@@ -1,10 +1,17 @@
 import logo from './logo.svg';
 import queryString from 'querystring'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css';
 
 
 function App() {
+
+  const [playlistData, setPlaylistData] = useState([])
+
+  // const [userData, setUserData] = useState([])
+
+  const [sharePlaylist, setSharePlaylist] = useState([])
+
 
   useEffect(()=>{
     let parsed = queryString.parse(window.location.search)
@@ -24,13 +31,24 @@ function App() {
         fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
           method: 'GET',
           headers: {'Authorization': 'Bearer ' + accessToken},
-        }).then((response) => {
-          console.log(response.json(), 'YAYYYY')
+        }).then(response => response.json())
+        .then((data) => {
+          console.log(data)
+          setSharePlaylist(data.items)
+        });
+
+        fetch('https://api.spotify.com/v1/me/player/recently-played', {
+          method: 'GET',
+          headers: {'Authorization': 'Bearer ' + accessToken},
+        }).then(response => response.json(), 'playlisttt')
+        .then((data)=> {
+          console.log(data)
+          setPlaylistData(data.items)
         })
       })
     }
     fetchData()
-  })
+  },[])
 
 
   return (
@@ -38,6 +56,14 @@ function App() {
       <header className="">
         <h1>spotify</h1>
       </header>
+      <div className="data">
+        {sharePlaylist.map((song, index)=>{
+          console.log(song)
+          
+        }) 
+
+        }
+      </div>
     </div>
   );
 }
