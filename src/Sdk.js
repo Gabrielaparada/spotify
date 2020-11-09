@@ -1,17 +1,21 @@
 import { useEffect, useState } from 'react'
-import queryString from 'querystring'
 
 
-function SdkPlaylist({token}){
+
+function SdkPlaylist({token, uri}){
+
   const [sdk, setSdk] = useState(undefined)
 
 useEffect(()=>{
-
+  if(!token){
+    return
+  }
 window.onSpotifyWebPlaybackSDKReady = () => {
   const player = new window.Spotify.Player({
     name: 'Web Playback SDK Quick Start Player',
     getOAuthToken: cb => { cb(token); }
   });
+  
 
   // Error handling
   player.addListener('initialization_error', ({ message }) => { console.error(message); });
@@ -37,21 +41,25 @@ window.onSpotifyWebPlaybackSDKReady = () => {
   player.connect();
 };
 
-},[])
+},[token])
 
 useEffect(()=>{
+
+  const body = JSON.stringify({ uris: uri })
 
   if (!sdk){
     return
   }
   fetch(`https://api.spotify.com/v1/me/player/play?device_id=${sdk}`, {
     method: 'PUT',
-    body: JSON.stringify({ uris: ['spotify:track:7xGfFoTpQ2E7fRF5lN10tr'] }),
+    body,
+    // body: JSON.stringify({ uris: ['spotify:track:7xGfFoTpQ2E7fRF5lN10tr'] }),
+    // {"context_uri": "spotify:album:1Je1IMUlBXcx1Fz0WE7oPT"}
     headers: {'Authorization': 'Bearer ' + token },
   }).then((response) => {
     console.log(response, 'response')
   })
-},[sdk, token])
+},[sdk])
 
 
 
@@ -60,7 +68,6 @@ useEffect(()=>{
       <p>Hi</p>
     </div>
   )
-
 
 
 
